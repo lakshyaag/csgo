@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 
 # accuracy
 # kast
@@ -6,6 +7,8 @@ import pandas as pd
 # kill stats
 # flash stats
 # econ stats
+
+
 def player_stats(game_rounds, return_type="json"):
     player_statistics = {}
     for r in game_rounds:
@@ -120,11 +123,14 @@ def player_stats(game_rounds, return_type="json"):
             kast[str(p["steamID"]) + " - " + p["playerName"]]["t"] = False
         # Calculate kills
         for i, k in enumerate(r["kills"]):
-            killer_key = str(k["attackerSteamID"]) + " - " + str(k["attackerName"])
+            killer_key = str(k["attackerSteamID"]) + \
+                " - " + str(k["attackerName"])
             victim_key = str(k["victimSteamID"]) + " - " + str(k["victimName"])
-            assister_key = str(k["assisterSteamID"]) + " - " + str(k["assisterName"])
+            assister_key = str(k["assisterSteamID"]) + \
+                " - " + str(k["assisterName"])
             flashthrower_key = (
-                str(k["flashThrowerSteamID"]) + " - " + str(k["flashThrowerName"])
+                str(k["flashThrowerSteamID"]) +
+                " - " + str(k["flashThrowerName"])
             )
             if (
                 k["attackerSteamID"]
@@ -186,7 +192,8 @@ def player_stats(game_rounds, return_type="json"):
             if k["isSuicide"] and victim_key in player_statistics.keys():
                 player_statistics[victim_key]["suicides"] += 1
         for d in r["damages"]:
-            attacker_key = str(d["attackerSteamID"]) + " - " + str(d["attackerName"])
+            attacker_key = str(d["attackerSteamID"]) + \
+                " - " + str(d["attackerName"])
             victim_key = str(d["victimSteamID"]) + " - " + str(d["victimName"])
 
             if (
@@ -268,7 +275,8 @@ def player_stats(game_rounds, return_type="json"):
         )
     for player in player_statistics:
         player_statistics[player]["kdr"] = round(
-            player_statistics[player]["kills"] / player_statistics[player]["deaths"]
+            player_statistics[player]["kills"] /
+            player_statistics[player]["deaths"]
             if player_statistics[player]["deaths"] != 0
             else player_statistics[player]["kills"],
             2,
@@ -289,7 +297,8 @@ def player_stats(game_rounds, return_type="json"):
         )
     for player in player_statistics:
         player_statistics[player]["hsPercent"] = round(
-            player_statistics[player]["hs"] / player_statistics[player]["kills"]
+            player_statistics[player]["hs"] /
+            player_statistics[player]["kills"]
             if player_statistics[player]["kills"] != 0
             else 0,
             2,
@@ -335,3 +344,70 @@ def player_stats(game_rounds, return_type="json"):
         )
     else:
         return player_statistics
+
+
+def convert_to_df(column_name, data):
+    json_object = json.loads(data[column_name].to_json())
+    df = pd.DataFrame(columns=['roundNum'])
+
+    for r in json_object:
+        d = pd.DataFrame(json_object[r])
+        d['roundNum'] = r
+        df = pd.concat([df, d])
+
+    return df
+
+
+def team_stats(game_rounds, return_type="json"):
+    team_statistics = {}
+
+    df = pd.DataFrame(game_rounds['gameRounds'])
+
+    damages_df = convert_to_df('damages', df)
+    grenades_df = convert_to_df('grenades', df)
+
+    team_list = df['ctTeam'].unique()
+    side_scores = df.groupby(['winningSide', 'winningTeam'])[
+        'roundNum'].count().unstack()
+    final_scores = side_scores.melt().groupby('winningTeam').sum(
+        'value').rename(columns={"value": "final_score"}).T
+    roundEndReason = df.groupby(['roundEndReason'])[
+        'winningTeam'].value_counts().unstack().fillna(0).astype(int)
+    ct_spend = df.groupby(['ctTeam'])['ctSpend'].sum()
+    t_spend = df.groupby(['tTeam'])['tSpend'].sum()
+    team_adr = (damages_df.groupby('attackerTeam')[
+                'hpDamage'].sum() / damages_df['roundNum'].astype(int).max())
+    side_adr = damages_df.groupby(['attackerTeam', 'attackerSide'])['hpDamage'].sum().unstack().fillna(0).T.astype(
+        int) / (damages_df.groupby(['attackerTeam', 'attackerSide'])['roundNum'].nunique().unstack().fillna(0).T)
+    utility_damage = damages_df.query('weaponClass == "Grenade"').groupby(
+        ['attackerTeam', 'attackerSide'])['hpDamage'].sum().unstack().fillna(0).T.astype(int)
+    grenade_types = grenades_df.groupby(
+        'throwerTeam')['grenadeType'].value_counts().unstack().T
+
+    for t in team_list:
+        team_statistics[t] = {
+            'teamName': t,
+            'finalScore': final_scores[t]['final_score'],
+            'ctScore': side_scores[t]['CT'],
+            'tScore': side_scores[t]['T'],
+            'roundEndReasons': json.loads(roundEndReason[t].to_json()),
+            'ctSpend': ct_spend[t],
+            'tSpend': t_spend[t],
+            'totalSpend': ct_spend[t] + t_spend[t],
+            'totalADR': team_adr[t],
+            'ctADR': side_adr[t]['CT'],
+            'tADR': side_adr[t]['T'],
+            'ctGrenadeDamage': utility_damage[t]['CT'],
+            'tGrenadeDamage': utility_damage[t]['T'],
+            'totalGrenadeDamage': utility_damage[t].sum(),
+            'grenadeTypes': json.loads(grenade_types[t].to_json())
+        }
+
+    if return_type == "df":
+        return (
+            pd.DataFrame()
+            .from_dict(team_statistics, orient="index")
+            .reset_index(drop=True)
+        )
+    else:
+        return team_statistics
