@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>awpy.analytics.stats &mdash; awpy 1.1.9 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> awpy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Example Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../projects.html">Projects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq.html">Frequently Asked Questions (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License and Acknowledgments</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../analytics.html">Analytics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parser.html">Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../visualization.html">Visualization</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">awpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>awpy.analytics.stats</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for awpy.analytics.stats</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="c1"># accuracy</span>
+<span class="c1"># kast</span>
+<span class="c1"># adr</span>
+<span class="c1"># kill stats</span>
+<span class="c1"># flash stats</span>
+<span class="c1"># econ stats</span>
+
+
+<div class="viewcode-block" id="player_stats"><a class="viewcode-back" href="../../../analytics.html#awpy.analytics.stats.player_stats">[docs]</a><span class="k">def</span> <span class="nf">player_stats</span><span class="p">(</span><span class="n">game_rounds</span><span class="p">,</span> <span class="n">return_type</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
+    <span class="n">player_statistics</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">game_rounds</span><span class="p">:</span>
+        <span class="c1"># Add players</span>
+        <span class="n">ct_side</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;ctSide&quot;</span><span class="p">]</span>
+        <span class="n">t_side</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;tSide&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ct_side</span><span class="p">[</span><span class="s2">&quot;players&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="p">:</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;steamID&quot;</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;playerName&quot;</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;teamName&quot;</span><span class="p">:</span> <span class="n">ct_side</span><span class="p">[</span><span class="s2">&quot;teamName&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;isBot&quot;</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;totalRounds&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;kills&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;deaths&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;kdr&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;assists&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;tradeKills&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;teamKills&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;suicides&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;flashAssists&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;totalDamageGiven&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;totalDamageTaken&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;totalTeamDamageGiven&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;adr&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;totalShots&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;shotsHit&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;rating&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;kast&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;hs&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;hsPercent&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;firstKills&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;firstDeaths&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;utilityDamage&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;smokesThrown&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;flashesThrown&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;heThrown&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;fireThrown&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;enemiesFlashed&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;teammatesFlashed&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;blindTime&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;plants&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;defuses&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]][</span>
+                    <span class="s2">&quot;totalRounds&quot;</span>
+                <span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]][</span>
+                    <span class="s2">&quot;totalRounds&quot;</span>
+                <span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">t_side</span><span class="p">[</span><span class="s2">&quot;players&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="p">:</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;steamID&quot;</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;playerName&quot;</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;teamName&quot;</span><span class="p">:</span> <span class="n">t_side</span><span class="p">[</span><span class="s2">&quot;teamName&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;totalRounds&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;kills&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;deaths&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;kdr&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;assists&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;tradeKills&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;teamKills&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;suicides&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;flashAssists&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;totalDamageGiven&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;totalDamageTaken&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;totalTeamDamageGiven&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;adr&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;totalShots&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;shotsHit&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;rating&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;kast&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;hs&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;hsPercent&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;firstKills&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;firstDeaths&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;utilityDamage&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;smokesThrown&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;flashesThrown&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;heThrown&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;fireThrown&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;enemiesFlashed&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;teammatesFlashed&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;blindTime&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;plants&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;defuses&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]][</span>
+                    <span class="s2">&quot;totalRounds&quot;</span>
+                <span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]][</span>
+                    <span class="s2">&quot;totalRounds&quot;</span>
+                <span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">kast</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">t_side</span><span class="p">[</span><span class="s2">&quot;players&quot;</span><span class="p">]:</span>
+            <span class="n">kast</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">kast</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]][</span><span class="s2">&quot;k&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">kast</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]][</span><span class="s2">&quot;a&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">kast</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]][</span><span class="s2">&quot;s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">kast</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]][</span><span class="s2">&quot;t&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ct_side</span><span class="p">[</span><span class="s2">&quot;players&quot;</span><span class="p">]:</span>
+            <span class="n">kast</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">kast</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]][</span><span class="s2">&quot;k&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">kast</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]][</span><span class="s2">&quot;a&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">kast</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]][</span><span class="s2">&quot;s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">kast</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;steamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]][</span><span class="s2">&quot;t&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># Calculate kills</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;kills&quot;</span><span class="p">]):</span>
+            <span class="n">killer_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="s2">&quot;attackerSteamID&quot;</span><span class="p">])</span> <span class="o">+</span> \
+                <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="s2">&quot;attackerName&quot;</span><span class="p">])</span>
+            <span class="n">victim_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="s2">&quot;victimSteamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="s2">&quot;victimName&quot;</span><span class="p">])</span>
+            <span class="n">assister_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="s2">&quot;assisterSteamID&quot;</span><span class="p">])</span> <span class="o">+</span> \
+                <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="s2">&quot;assisterName&quot;</span><span class="p">])</span>
+            <span class="n">flashthrower_key</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="s2">&quot;flashThrowerSteamID&quot;</span><span class="p">])</span> <span class="o">+</span>
+                <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="s2">&quot;flashThrowerName&quot;</span><span class="p">])</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">k</span><span class="p">[</span><span class="s2">&quot;attackerSteamID&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">k</span><span class="p">[</span><span class="s2">&quot;isSuicide&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">k</span><span class="p">[</span><span class="s2">&quot;isTeamkill&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">killer_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">killer_key</span><span class="p">][</span><span class="s2">&quot;kills&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">kast</span><span class="p">[</span><span class="n">killer_key</span><span class="p">][</span><span class="s2">&quot;k&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">victim_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">victim_key</span><span class="p">][</span><span class="s2">&quot;deaths&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">kast</span><span class="p">[</span><span class="n">victim_key</span><span class="p">][</span><span class="s2">&quot;s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">k</span><span class="p">[</span><span class="s2">&quot;assisterSteamID&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">k</span><span class="p">[</span><span class="s2">&quot;assisterTeam&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">k</span><span class="p">[</span><span class="s2">&quot;victimTeam&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">assister_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">assister_key</span><span class="p">][</span><span class="s2">&quot;assists&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">kast</span><span class="p">[</span><span class="n">assister_key</span><span class="p">][</span><span class="s2">&quot;a&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">k</span><span class="p">[</span><span class="s2">&quot;flashThrowerSteamID&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">k</span><span class="p">[</span><span class="s2">&quot;flashThrowerTeam&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">k</span><span class="p">[</span><span class="s2">&quot;victimTeam&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">flashthrower_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">flashthrower_key</span><span class="p">][</span><span class="s2">&quot;flashAssists&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">kast</span><span class="p">[</span><span class="n">flashthrower_key</span><span class="p">][</span><span class="s2">&quot;a&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">k</span><span class="p">[</span><span class="s2">&quot;isTrade&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">k</span><span class="p">[</span><span class="s2">&quot;attackerSteamID&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">killer_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="ow">and</span> <span class="n">victim_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">killer_key</span><span class="p">][</span><span class="s2">&quot;tradeKills&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">kast</span><span class="p">[</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;kills&quot;</span><span class="p">][</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="s2">&quot;victimSteamID&quot;</span><span class="p">])</span>
+                    <span class="o">+</span> <span class="s2">&quot; - &quot;</span>
+                    <span class="o">+</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;kills&quot;</span><span class="p">][</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="s2">&quot;victimName&quot;</span><span class="p">]</span>
+                <span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">k</span><span class="p">[</span><span class="s2">&quot;isFirstKill&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">k</span><span class="p">[</span><span class="s2">&quot;attackerSteamID&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">killer_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="ow">and</span> <span class="n">victim_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">killer_key</span><span class="p">][</span><span class="s2">&quot;firstKills&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">victim_key</span><span class="p">][</span><span class="s2">&quot;firstDeaths&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">k</span><span class="p">[</span><span class="s2">&quot;isTeamkill&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">k</span><span class="p">[</span><span class="s2">&quot;attackerSteamID&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">killer_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">killer_key</span><span class="p">][</span><span class="s2">&quot;teamKills&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">k</span><span class="p">[</span><span class="s2">&quot;isHeadshot&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">k</span><span class="p">[</span><span class="s2">&quot;attackerSteamID&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">killer_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">killer_key</span><span class="p">][</span><span class="s2">&quot;hs&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">k</span><span class="p">[</span><span class="s2">&quot;isSuicide&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">victim_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">victim_key</span><span class="p">][</span><span class="s2">&quot;suicides&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;damages&quot;</span><span class="p">]:</span>
+            <span class="n">attacker_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;attackerSteamID&quot;</span><span class="p">])</span> <span class="o">+</span> \
+                <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;attackerName&quot;</span><span class="p">])</span>
+            <span class="n">victim_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;victimSteamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;victimName&quot;</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">d</span><span class="p">[</span><span class="s2">&quot;attackerSteamID&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;isFriendlyFire&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">attacker_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">attacker_key</span><span class="p">][</span><span class="s2">&quot;totalDamageGiven&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">d</span><span class="p">[</span>
+                    <span class="s2">&quot;hpDamageTaken&quot;</span>
+                <span class="p">]</span>
+            <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;victimSteamID&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">victim_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">victim_key</span><span class="p">][</span><span class="s2">&quot;totalDamageTaken&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;hpDamageTaken&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;isFriendlyFire&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">attacker_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">attacker_key</span><span class="p">][</span><span class="s2">&quot;totalTeamDamageGiven&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">d</span><span class="p">[</span>
+                    <span class="s2">&quot;hpDamageTaken&quot;</span>
+                <span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">d</span><span class="p">[</span><span class="s2">&quot;weaponClass&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Unknown&quot;</span><span class="p">,</span> <span class="s2">&quot;Grenade&quot;</span><span class="p">,</span> <span class="s2">&quot;Equipment&quot;</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">attacker_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">attacker_key</span><span class="p">][</span><span class="s2">&quot;shotsHit&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">d</span><span class="p">[</span><span class="s2">&quot;weaponClass&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Grenade&quot;</span>
+                <span class="ow">and</span> <span class="n">attacker_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">attacker_key</span><span class="p">][</span><span class="s2">&quot;utilityDamage&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;hpDamageTaken&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;weaponFires&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="s2">&quot;playerSteamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">w</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]</span>
+                <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="s2">&quot;playerSteamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">w</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]][</span>
+                    <span class="s2">&quot;totalShots&quot;</span>
+                <span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;flashes&quot;</span><span class="p">]:</span>
+            <span class="n">flasher_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s2">&quot;attackerSteamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;attackerName&quot;</span><span class="p">]</span>
+            <span class="n">player_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s2">&quot;playerSteamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;attackerSteamID&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">flasher_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;attackerSide&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;playerSide&quot;</span><span class="p">]:</span>
+                    <span class="n">player_statistics</span><span class="p">[</span><span class="n">flasher_key</span><span class="p">][</span><span class="s2">&quot;teammatesFlashed&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">player_statistics</span><span class="p">[</span><span class="n">flasher_key</span><span class="p">][</span><span class="s2">&quot;enemiesFlashed&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">player_statistics</span><span class="p">[</span><span class="n">flasher_key</span><span class="p">][</span><span class="s2">&quot;blindTime&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;flashDuration&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;grenades&quot;</span><span class="p">]:</span>
+            <span class="n">thrower_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="s2">&quot;throwerSteamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">g</span><span class="p">[</span><span class="s2">&quot;throwerName&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">g</span><span class="p">[</span><span class="s2">&quot;throwerSteamID&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">thrower_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">g</span><span class="p">[</span><span class="s2">&quot;grenadeType&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Smoke Grenade&quot;</span><span class="p">:</span>
+                    <span class="n">player_statistics</span><span class="p">[</span><span class="n">thrower_key</span><span class="p">][</span><span class="s2">&quot;smokesThrown&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">g</span><span class="p">[</span><span class="s2">&quot;grenadeType&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Flashbang&quot;</span><span class="p">:</span>
+                    <span class="n">player_statistics</span><span class="p">[</span><span class="n">thrower_key</span><span class="p">][</span><span class="s2">&quot;flashesThrown&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">g</span><span class="p">[</span><span class="s2">&quot;grenadeType&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;HE Grenade&quot;</span><span class="p">:</span>
+                    <span class="n">player_statistics</span><span class="p">[</span><span class="n">thrower_key</span><span class="p">][</span><span class="s2">&quot;heThrown&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">g</span><span class="p">[</span><span class="s2">&quot;grenadeType&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Incendiary Grenade&quot;</span><span class="p">,</span> <span class="s2">&quot;Molotov&quot;</span><span class="p">]:</span>
+                    <span class="n">player_statistics</span><span class="p">[</span><span class="n">thrower_key</span><span class="p">][</span><span class="s2">&quot;fireThrown&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;bombEvents&quot;</span><span class="p">]:</span>
+            <span class="n">player_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s2">&quot;playerSteamID&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">b</span><span class="p">[</span><span class="s2">&quot;playerName&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">b</span><span class="p">[</span><span class="s2">&quot;playerSteamID&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">player_key</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">b</span><span class="p">[</span><span class="s2">&quot;bombAction&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;plant&quot;</span><span class="p">:</span>
+                    <span class="n">player_statistics</span><span class="p">[</span><span class="n">player_key</span><span class="p">][</span><span class="s2">&quot;plants&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">b</span><span class="p">[</span><span class="s2">&quot;bombAction&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;defuse&quot;</span><span class="p">:</span>
+                    <span class="n">player_statistics</span><span class="p">[</span><span class="n">player_key</span><span class="p">][</span><span class="s2">&quot;defuses&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="n">kast</span><span class="p">:</span>
+            <span class="n">all_true</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">kast</span><span class="p">[</span><span class="n">player</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">kast</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="n">component</span><span class="p">]:</span>
+                    <span class="n">all_true</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">all_true</span><span class="p">:</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;kast&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="n">kast</span><span class="p">:</span>
+        <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;kast&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span>
+            <span class="mi">100</span>
+            <span class="o">*</span> <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;kast&quot;</span><span class="p">]</span>
+            <span class="o">/</span> <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;totalRounds&quot;</span><span class="p">],</span>
+            <span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="p">:</span>
+        <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;blindTime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span>
+            <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;blindTime&quot;</span><span class="p">],</span> <span class="mi">2</span>
+        <span class="p">)</span>
+    <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="p">:</span>
+        <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;kdr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span>
+            <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;kills&quot;</span><span class="p">]</span> <span class="o">/</span>
+            <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;deaths&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;deaths&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
+            <span class="k">else</span> <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;kills&quot;</span><span class="p">],</span>
+            <span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="p">:</span>
+        <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;adr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span>
+            <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;totalDamageGiven&quot;</span><span class="p">]</span>
+            <span class="o">/</span> <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;totalRounds&quot;</span><span class="p">],</span>
+            <span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="p">:</span>
+        <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;accuracy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span>
+            <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;shotsHit&quot;</span><span class="p">]</span>
+            <span class="o">/</span> <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;totalShots&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;totalShots&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
+            <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="p">:</span>
+        <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;hsPercent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span>
+            <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;hs&quot;</span><span class="p">]</span> <span class="o">/</span>
+            <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;kills&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;kills&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
+            <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="n">player_statistics</span><span class="p">:</span>
+        <span class="n">impact</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">2.13</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;kills&quot;</span><span class="p">]</span>
+                <span class="o">/</span> <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;totalRounds&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="mf">0.42</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;assists&quot;</span><span class="p">]</span>
+                <span class="o">/</span> <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;totalRounds&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="o">-</span> <span class="mf">0.41</span>
+        <span class="p">)</span>
+        <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;rating&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">0.0073</span> <span class="o">*</span> <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;kast&quot;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="mf">0.3591</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;kills&quot;</span><span class="p">]</span>
+                <span class="o">/</span> <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;totalRounds&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="o">-</span> <span class="mf">0.5329</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;deaths&quot;</span><span class="p">]</span>
+                <span class="o">/</span> <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;totalRounds&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="mf">0.2372</span> <span class="o">*</span> <span class="p">(</span><span class="n">impact</span><span class="p">)</span>
+            <span class="o">+</span> <span class="mf">0.0032</span> <span class="o">*</span> <span class="p">(</span><span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;adr&quot;</span><span class="p">])</span>
+            <span class="o">+</span> <span class="mf">0.1587</span>
+        <span class="p">)</span>
+        <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;rating&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span>
+            <span class="n">player_statistics</span><span class="p">[</span><span class="n">player</span><span class="p">][</span><span class="s2">&quot;rating&quot;</span><span class="p">],</span> <span class="mi">2</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_type</span> <span class="o">==</span> <span class="s2">&quot;df&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">player_statistics</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">player_statistics</span></div>
+
+
+<div class="viewcode-block" id="convert_to_df"><a class="viewcode-back" href="../../../analytics.html#awpy.analytics.stats.convert_to_df">[docs]</a><span class="k">def</span> <span class="nf">convert_to_df</span><span class="p">(</span><span class="n">column_name</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">json_object</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">column_name</span><span class="p">]</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;roundNum&#39;</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">json_object</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">json_object</span><span class="p">[</span><span class="n">r</span><span class="p">])</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;roundNum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">d</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="team_stats"><a class="viewcode-back" href="../../../analytics.html#awpy.analytics.stats.team_stats">[docs]</a><span class="k">def</span> <span class="nf">team_stats</span><span class="p">(</span><span class="n">game_rounds</span><span class="p">,</span> <span class="n">return_type</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
+    <span class="n">team_statistics</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">game_rounds</span><span class="p">[</span><span class="s1">&#39;gameRounds&#39;</span><span class="p">])</span>
+
+    <span class="n">damages_df</span> <span class="o">=</span> <span class="n">convert_to_df</span><span class="p">(</span><span class="s1">&#39;damages&#39;</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+    <span class="n">grenades_df</span> <span class="o">=</span> <span class="n">convert_to_df</span><span class="p">(</span><span class="s1">&#39;grenades&#39;</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+
+    <span class="n">team_list</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;ctTeam&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+    <span class="n">side_scores</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;winningSide&#39;</span><span class="p">,</span> <span class="s1">&#39;winningTeam&#39;</span><span class="p">])[</span>
+        <span class="s1">&#39;roundNum&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span>
+    <span class="n">final_scores</span> <span class="o">=</span> <span class="n">side_scores</span><span class="o">.</span><span class="n">melt</span><span class="p">()</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;winningTeam&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+        <span class="s1">&#39;value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;final_score&quot;</span><span class="p">})</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">roundEndReason</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;roundEndReason&#39;</span><span class="p">])[</span>
+        <span class="s1">&#39;winningTeam&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">ct_spend</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;ctTeam&#39;</span><span class="p">])[</span><span class="s1">&#39;ctSpend&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">t_spend</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;tTeam&#39;</span><span class="p">])[</span><span class="s1">&#39;tSpend&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">team_adr</span> <span class="o">=</span> <span class="p">(</span><span class="n">damages_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;attackerTeam&#39;</span><span class="p">)[</span>
+                <span class="s1">&#39;hpDamage&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">damages_df</span><span class="p">[</span><span class="s1">&#39;roundNum&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">side_adr</span> <span class="o">=</span> <span class="n">damages_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;attackerTeam&#39;</span><span class="p">,</span> <span class="s1">&#39;attackerSide&#39;</span><span class="p">])[</span><span class="s1">&#39;hpDamage&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+        <span class="nb">int</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">damages_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;attackerTeam&#39;</span><span class="p">,</span> <span class="s1">&#39;attackerSide&#39;</span><span class="p">])[</span><span class="s1">&#39;roundNum&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">utility_damage</span> <span class="o">=</span> <span class="n">damages_df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;weaponClass == &quot;Grenade&quot;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
+        <span class="p">[</span><span class="s1">&#39;attackerTeam&#39;</span><span class="p">,</span> <span class="s1">&#39;attackerSide&#39;</span><span class="p">])[</span><span class="s1">&#39;hpDamage&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">grenade_types</span> <span class="o">=</span> <span class="n">grenades_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
+        <span class="s1">&#39;throwerTeam&#39;</span><span class="p">)[</span><span class="s1">&#39;grenadeType&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">team_list</span><span class="p">:</span>
+        <span class="n">team_statistics</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;teamName&#39;</span><span class="p">:</span> <span class="n">t</span><span class="p">,</span>
+            <span class="s1">&#39;finalScore&#39;</span><span class="p">:</span> <span class="n">final_scores</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="s1">&#39;final_score&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;ctScore&#39;</span><span class="p">:</span> <span class="n">side_scores</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="s1">&#39;CT&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;tScore&#39;</span><span class="p">:</span> <span class="n">side_scores</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="s1">&#39;T&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;roundEndReasons&#39;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">roundEndReason</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">to_json</span><span class="p">()),</span>
+            <span class="s1">&#39;ctSpend&#39;</span><span class="p">:</span> <span class="n">ct_spend</span><span class="p">[</span><span class="n">t</span><span class="p">],</span>
+            <span class="s1">&#39;tSpend&#39;</span><span class="p">:</span> <span class="n">t_spend</span><span class="p">[</span><span class="n">t</span><span class="p">],</span>
+            <span class="s1">&#39;totalSpend&#39;</span><span class="p">:</span> <span class="n">ct_spend</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">+</span> <span class="n">t_spend</span><span class="p">[</span><span class="n">t</span><span class="p">],</span>
+            <span class="s1">&#39;totalADR&#39;</span><span class="p">:</span> <span class="n">team_adr</span><span class="p">[</span><span class="n">t</span><span class="p">],</span>
+            <span class="s1">&#39;ctADR&#39;</span><span class="p">:</span> <span class="n">side_adr</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="s1">&#39;CT&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;tADR&#39;</span><span class="p">:</span> <span class="n">side_adr</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="s1">&#39;T&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;ctGrenadeDamage&#39;</span><span class="p">:</span> <span class="n">utility_damage</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="s1">&#39;CT&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;tGrenadeDamage&#39;</span><span class="p">:</span> <span class="n">utility_damage</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="s1">&#39;T&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;totalGrenadeDamage&#39;</span><span class="p">:</span> <span class="n">utility_damage</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
+            <span class="s1">&#39;grenadeTypes&#39;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">grenade_types</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+        <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">return_type</span> <span class="o">==</span> <span class="s2">&quot;df&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">team_statistics</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">team_statistics</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Peter Xenopoulos.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
